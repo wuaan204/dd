@@ -3,7 +3,7 @@ name: Telegram daily check-in
 on:
   schedule:
     # GitHub Actions cron dùng UTC. 00:00 UTC mỗi ngày.
-    - cron: "48 17 * * *"
+    - cron: "52 0 * * *"
   workflow_dispatch: {}
 
 jobs:
