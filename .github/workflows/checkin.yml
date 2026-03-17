@@ -1,0 +1,32 @@
+name: Telegram daily check-in
+
+on:
+  schedule:
+    # GitHub Actions cron dùng UTC. 00:00 UTC mỗi ngày.
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run check-in
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION_STRING: ${{ secrets.TG_SESSION_STRING }}
+          TARGET_BOT: ${{ secrets.TARGET_BOT }}
+          CHECKIN_MESSAGE: ${{ secrets.CHECKIN_MESSAGE }}
+        run: python main.py
+
