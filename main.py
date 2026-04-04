@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import datetime
 
+from dotenv import load_dotenv
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
@@ -22,15 +23,25 @@ async def run() -> None:
     target = env("TARGET_BOT")  # ví dụ: @my_checkin_bot
     message = env("CHECKIN_MESSAGE")  # ví dụ: /checkin hoặc "Điểm danh"
 
-    client = TelegramClient(StringSession(session_string), api_id, api_hash)
-    async with client:
+    client = TelegramClient(StringSession(session_string.strip()), api_id, api_hash)
+    await client.connect()
+    try:
+        if not await client.is_user_authorized():
+            raise RuntimeError(
+                "Session Telethon không hợp lệ hoặc đã hết hạn (GitHub Actions không thể nhập số điện thoại). "
+                "Tạo lại TG_SESSION_STRING trên máy local (cùng TG_API_ID / TG_API_HASH), "
+                "dán vào GitHub Secrets, không thêm dấu ngoặc hay xuống dòng."
+            )
         me = await client.get_me()
         print(f"[{datetime.utcnow().isoformat()}Z] Đăng nhập OK: {getattr(me, 'username', None) or me.id}")
         await client.send_message(target, message)
         print(f"[{datetime.utcnow().isoformat()}Z] Đã gửi tới {target}: {message!r}")
+    finally:
+        await client.disconnect()
 
 
 def main() -> None:
+    load_dotenv()
     try:
         import asyncio
 
